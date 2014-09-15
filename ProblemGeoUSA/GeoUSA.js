@@ -36,15 +36,31 @@ var svg = canvas.append("g").attr({
 
 var projection = d3.geo.albersUsa().translate([width / 2, height / 2]);//.precision(.1);
 var path = d3.geo.path().projection(projection);
-
+var centered;
 
 var dataSet = {};
 
-
-
 function loadStations() {
     d3.csv("../data/NSRDB_StationsMeta.csv",function(error,data){
-        //....
+        var stations = [];
+        data.forEach(function(d){
+            station = {USAF: "", latitude: 0, longitude: 0, state: ""};
+            station.USAF = d['USAF'];
+            station.latitude = parseFloat(String(d['NSRDB_LAT (dd)']));
+            station.longitude = parseFloat(String(d['NSRDB_LON(dd)']));
+            station.state = d['STATION'];
+            if (projection([station.longitude, station.latitude]) != null){
+                stations.push(station);
+            }
+        })
+        svg.selectAll(".station")
+            .data(stations)
+            .enter().append("circle")
+            .attr("class", "station")
+            .attr("r", 2)
+            .attr("transform", function(d) {
+                return "translate(" + projection([d.longitude, d.latitude]) + ")"
+            })
     });
 }
 
@@ -62,16 +78,48 @@ function loadStats() {
 }
 
 
-d3.json("../data/usnamed.json", function(error, data) {
+d3.json("../data/us-named.json", function(error, data) {
 
     var usMap = topojson.feature(data,data.objects.states).features
-    console.log(usMap);
+    // console.log(usMap);
 
-    //svg.selectAll(".country").data(usMap).enter().... 
+    svg.append("g").attr("id", "states")
+        .selectAll(".country")
+        .data(usMap)
+        .enter().append("path")
+        .attr("d", path)
+        .on("click", zoomToBB);
     // see also: http://bl.ocks.org/mbostock/4122298
 
-    loadStats();
+    loadStations();
+    // var screencoord = projection([longitude, latitude]);
 });
+
+// ZOOMING
+function zoomToBB(d) {
+  var x, y, k;
+
+  if (d && centered !== d) {
+    var centroid = path.centroid(d);
+    x = centroid[0];
+    y = centroid[1];
+    k = 4;
+    centered = d;
+  } else {
+    x = width / 2;
+    y = height / 2;
+    k = 1;
+    centered = null;
+  }
+
+  svg.selectAll("path")
+      .classed("active", centered && function(d) { return d === centered; });
+
+  svg.transition()
+      .duration(750)
+      .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
+      .style("stroke-width", 1.5 / k + "px");
+}
 
 
 
@@ -85,13 +133,6 @@ var updateDetailVis = function(data, name){
   
 }
 
-
-
-// ZOOMING
-function zoomToBB() {
-
-
-}
 
 function resetZoom() {
     
