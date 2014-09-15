@@ -8,9 +8,39 @@
 <body>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/topojson.v1.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
 <style type="text/css">
     svg{
         /*background: #eeeeee;*/
+    }
+
+    .d3-tip {
+      line-height: 1;
+      font-weight: bold;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      border-radius: 2px;
+    }
+
+    /* Creates a small triangle extender for the tooltip */
+    .d3-tip:after {
+      box-sizing: border-box;
+      display: inline;
+      font-size: 10px;
+      width: 100%;
+      line-height: 1;
+      color: rgba(0, 0, 0, 0.8);
+      content: "\25BC";
+      position: absolute;
+      text-align: center;
+    }
+
+    /* Style northward tooltips differently */
+    .d3-tip.n:after {
+      margin: -1px 0 0 0;
+      top: 100%;
+      left: 0;
     }
 
     #states{
@@ -39,13 +69,26 @@
         shaperendering: crispEdges;
     }
 
+    path:hover {
+        fill: grey;
+    }
+
+    .station.hasData:hover{
+        opacity: 1;
+        fill: blue;
+        stroke: white;
+        stroke-width: 1.5;
+    }
+
     .station{
         fill:lightgrey;
         opacity: .7;
     }
     .station.hasData{
-        fill:blue;
-        opacity: 1;
+        fill:darkblue;
+        stroke: white;
+        stroke-width: 1.5;
+        opacity: 0.9;
     }
     .hourLine{
         fill:none;

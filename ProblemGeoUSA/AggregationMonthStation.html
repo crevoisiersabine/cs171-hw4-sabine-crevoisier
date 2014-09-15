@@ -7,7 +7,7 @@
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/queue.v1.min.js"></script>
 <script src="http://d3js.org/topojson.v1.min.js"></script>
-<script type="text/javascript" src="../jquery-1.11.0.min.js"></script>
+<script type="text/javascript" src="../libs/jquery-1.11.0.min.js"></script>
 <script src="../libs/FileSaver.js"></script>
 
 <div id="vis"></div>
@@ -16,17 +16,51 @@
 <script>
 
 
-    d3.json("../data/allData2003_2004.json",function(error,data){
-        console.log(data);
+    d3.json("../data/allData2003_2004.json", function(error,data){
+        // console.log(data);
 
         var allDates = [];
+        var reducedDataSet = {};
         var timeParser = d3.time.format("%b %-d, %Y %X %p");
+        var dayNameFormat = d3.time.format("%X"); //time name format
+
+        for (var key in data){
+            data[key].forEach(function(d){
+                allDates.push([d.date, d.value, key])
+            })
+        }
+
+        // console.log(allDates)
         
-		// add your source code
+        allDates.forEach(function(d){
+            var date = d[0]
+            var hour = dayNameFormat(timeParser.parse(String(d[0])))
+            var luminosity = d[1]
+            var month = date.substring(0, 3);
+            var station = d[2]
+            var timeList = reducedDataSet[month]; //aggregate the data per month
+            if (timeList==undefined){
+                timeList = {}
+            }
+            var stationList = timeList[station] //aggregate the data per station
+            if (stationList==undefined){
+                stationList = {}
+            }
+            if(stationList['sum']==undefined){
+                stationList['sum'] = 0.0;
+            }
+            if(stationList[hour]==undefined){
+                stationList[hour] = 0.0;
+            }
+            stationList['sum'] += parseFloat(luminosity); // this is the total luminosity for the station
+            stationList[hour] += parseFloat(luminosity); //this sums the luminosity over each hour
+            timeList[station] = stationList;
+            reducedDataSet[month] = timeList;
+        })
 
-        saveToFile(reducedDataSet,"reducedMonthStationHour2003_2004.json")
+        console.log(reducedDataSet);
 
-
+        // saveToFile(reducedDataSet,"reducedMonthStationHour2003_2004.json")
 
     })
 
