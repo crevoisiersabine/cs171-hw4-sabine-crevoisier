@@ -49,18 +49,21 @@
             if(stationList['sum']==undefined){
                 stationList['sum'] = 0.0;
             }
-            if(stationList[hour]==undefined){
-                stationList[hour] = 0.0;
+            if(stationList['hours']==undefined){
+                stationList['hours'] = {};
+            }
+            if(stationList['hours'][hour]==undefined){
+                stationList['hours'][hour] = 0.0;
             }
             stationList['sum'] += parseFloat(luminosity); // this is the total luminosity for the station
-            stationList[hour] += parseFloat(luminosity); //this sums the luminosity over each hour
+            stationList['hours'][hour] += parseFloat(luminosity); //this sums the luminosity over each hour
             timeList[station] = stationList;
             reducedDataSet[month] = timeList;
         })
 
         console.log(reducedDataSet);
 
-        // saveToFile(reducedDataSet,"reducedMonthStationHour2003_2004.json")
+        saveToFile(reducedDataSet,"reducedMonthStationHour2003_2004.json")
 
     })
 
